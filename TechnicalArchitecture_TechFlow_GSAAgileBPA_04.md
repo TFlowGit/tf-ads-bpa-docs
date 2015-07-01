@@ -1,8 +1,14 @@
-![](GSA_Agile_BPA_Proposal_Architecture_ts_comments-v3-media/media/image1.gif)
+![](TechnicalArchitecture_TechFlow_GSAAgileBPA_04-media/media/image1.gif)
 
 TechFlow, Inc. Response to
 
-BPA Agile - Technical Architecture
+Request for Quotation (RFQ)
+
+4QTFHS15004
+
+Agile Delivery Services (ADS I)
+
+Technical Architecture
 
 June 26, 2015
 
@@ -17,11 +23,26 @@ resulting contract. This restriction does not limit the Government’s
 right to use information contained in this data if it is obtained from
 another source.
 
-Overview
-========
+Purpose and Overview
+====================
 
 The purpose of this document is to provide the general architectural and
-design approach to the project.
+design approach developed by TechFlow for the Food and Drug
+Administration (FDA) in support of the Drug and Risk Information (DARI)
+public information website. It includes hardware, software and
+infrastructure details regarding the application.
+
+Hardware Architecture
+=====================
+
+The application was deployed on an IaaS infrastructure using Amazon AWS
+as a provider. Two VPCs were used. The application VPC contains the
+docker image of the prototype application. The management VPC contains
+the continuous integration and deployment system.
+
+![](TechnicalArchitecture_TechFlow_GSAAgileBPA_04-media/media/image5.png)
+
+Figure 1. Network Architecture
 
 Software Architecture
 =====================
@@ -35,16 +56,18 @@ application, and entities. The application API sits between the
 infrastructure and application layers and provides a public contract for
 the layers to communicate. To achieve flexibility and have low coupling
 it is important that the infrastructure and application be isolated and
-that neither should know about the internals of the other. [test]
+that neither should know about the internals of the other.
 
-External:
----------
+![](TechnicalArchitecture_TechFlow_GSAAgileBPA_04-media/media/image6.png)
+
+External
+--------
 
 The External Layer covers things like the database or cloud services
 that are not directly a part of the application.
 
-Infrastructure:
----------------
+Infrastructure
+--------------
 
 Application frameworks reside in the infrastructure layer. For example,
 we use Spring MVC to provide RESTful web services. This layer is kept as
@@ -53,8 +76,8 @@ infrastructure layer. If we switch databases it should only be required
 to add a new database repository. The application layer should remain
 unchanged.
 
-Application:
-------------
+Application
+-----------
 
 The application layer is the “conductor”. It implements the use cases
 and business rules of the software. To achieve this it manipulates the
@@ -67,8 +90,8 @@ the entity is actually stored. It might be in a database, an XML file,
 or in memory. It is only important that the repository fulfils the
 contract as specified by the application API.
 
-Entities:
----------
+Entities
+--------
 
 The entities are objects which store the data manipulated in the
 Application Layer
@@ -78,7 +101,7 @@ Request Lifecycle
 
 An example of how data passes through the layers of the software.
 
-![](GSA_Agile_BPA_Proposal_Architecture_ts_comments-v3-media/media/image6.png)
+![](TechnicalArchitecture_TechFlow_GSAAgileBPA_04-media/media/image7.png)
 
 [put a number on use case 9/10, move loopdyloop to cloud service]
 
@@ -110,9 +133,6 @@ An example of how data passes through the layers of the software.
 Testing
 =======
 
-Automated Testing
------------------
-
 Testing ensures that the software meets the acceptance criteria defined
 in the user story. Automated tests reduce the time to fully test the
 software by making it possible to fully re-test the software on demand.
@@ -140,33 +160,32 @@ written to make the test pass (green). The code written during the green
 cycle doesn't need to be well-factored: it only needs to pass the test.
 After the test passes the code is refactored. Then the cycle continues.
 
-Source Code Analysis
---------------------
+![](TechnicalArchitecture_TechFlow_GSAAgileBPA_04-media/media/image8.png)
 
-SonarQube is utilized as a reporting tool. It produces reports on the
-number of tests, pass/fail of test, code coverage, and adherence to
-source code formatting rules.
+Test Tools
+----------
+
+-   JUnit - A Java based unit test framework.
+
+-   Serenity BDD - a automated web integration test tool. It drives a
+    web browser to interact with the website as a user would
+
+Test Coverage
+-------------
+
+Jenkins and SonarQube generate reports on the number of unit tests,
+their status (pass/fail), and test coverage. , and adherence to source
+code formatting rules.
 
 Testability
 -----------
 
-This architecture is easy to test. During testing, the infrastructure
-layer may be replaced with a testing infrastructure. We then make calls
-to the applications public API with known inputs and inspect the
-outputs.
+This software was designed to be easy to test. The core application
+interacts with the infrastructure layer via Java interfaces. The
+infrastructure can be swapped out with test objects that emulate the
+expected behavior of the system.
 
-### Application Testing
-
-Block box or gray box testing is used to test the application layer. The
-test invokes a use case via the public API. If the use case has no
-collaborators in the infrastructure layer we can simply test the use
-case with a known input and inspect the output. If the use case
-collaborates with an infrastructure component it may be necessary
-implement a mock version of the component so it can be inspected.
-
-We do not directly test each collaborator in the application layer as
-this can lead to test brittleness when refactoring. The collaborators
-are tested indirectly via the public API.
+![](TechnicalArchitecture_TechFlow_GSAAgileBPA_04-media/media/image9.png)
 
 ### Infrastructure Testing
 
@@ -174,12 +193,13 @@ Ideally the infrastructure layer is simple and thin, so it’s obvious
 what it does and doesn’t require testing, but when this isn’t the case
 the public API can be stubbed. For example, we can return a “not found”
 response from the application layer and verify the controller returns a
-404 HTTP response code.
+404 HTTP response
+code.![](TechnicalArchitecture_TechFlow_GSAAgileBPA_04-media/media/image10.png)
 
 Technology Stack
 ================
 
--   **AngularJS** - A google backed open source Front-end MVC framework
+-   **AngularJS** - A Google-backed open source Front-end MVC framework
     to create a single page application
 
 -   **Spring Boot** - Light-weight, standalone servlet container.
@@ -188,6 +208,8 @@ Technology Stack
     database entries
 
 -   **PostgreSQL** - The world's most advanced open source database
+
+![](TechnicalArchitecture_TechFlow_GSAAgileBPA_04-media/media/image11.png)
 
 Continuous Integration and Deployment
 =====================================
@@ -200,6 +222,8 @@ and restarts it.
 Another Jenkins job updates the project's Maven site which includes
 several reports.
 
+![](TechnicalArchitecture_TechFlow_GSAAgileBPA_04-media/media/image12.png)
+
 Figure 1. Automated Deployment
 
 Documentation
@@ -209,7 +233,7 @@ Documentation is automatically generated directly from the source code
 wherever possible.
 
 Javadocs are created from the source code. Swagger is used to document
-REST services. Yatspec generates human readable test results.
+REST services.
 
 [Documentation examples]
 
